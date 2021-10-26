@@ -1,6 +1,6 @@
 ﻿using System.Web.Optimization;
 
-namespace AspNetWebFormsOkta
+namespace AspNetWebFormImplicitFlow
 {
     public class BundleConfig
     {

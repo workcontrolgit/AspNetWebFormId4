@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AspNetWebFormsOkta {
+namespace AspNetWebFormImplicitFlow {
     
     
     public partial class Site_Mobile {

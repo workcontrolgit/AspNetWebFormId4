@@ -18,9 +18,9 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
-[assembly: OwinStartup(typeof(AspNetWebFormsOkta.Startup))]
+[assembly: OwinStartup(typeof(AspNetWebFormImplicitFlow.Startup))]
 
-namespace AspNetWebFormsOkta
+namespace AspNetWebFormImplicitFlow
 {
     public class Startup
     {
@@ -47,12 +47,9 @@ namespace AspNetWebFormsOkta
             app.UseCookieAuthentication(new CookieAuthenticationOptions()
             {
                 AuthenticationType = "Cookies",
-                ExpireTimeSpan = TimeSpan.FromMinutes(10),
+                ExpireTimeSpan = TimeSpan.FromMinutes(20),
                 SlidingExpiration = true
             });
-
-            var openidConfiguration = OpenIdConnectConfigurationRetriever.GetAsync(
-                        $"{_authority}/.well-known/openid-configuration", CancellationToken.None);
 
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
@@ -63,11 +60,6 @@ namespace AspNetWebFormsOkta
                 PostLogoutRedirectUri = _postLogoutRedirectUri,
                 ResponseType = OpenIdConnectResponseType.IdTokenToken,
                 Scope = OpenIdConnectScope.OpenIdProfile,
-                //ProtocolValidator = new OpenIdConnectProtocolValidator()
-                //    {
-                //                        RequireNonce = true
-                //                                       },
-                MetadataAddress = "https://localhost:44310/.well-known/openid-configuration",
                 TokenValidationParameters = new TokenValidationParameters { NameClaimType = "name" },
                 Notifications = new OpenIdConnectAuthenticationNotifications
                 {
@@ -142,13 +134,5 @@ namespace AspNetWebFormsOkta
                 },
             });
         }
-
-        //private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
-        //{
-        //    context.HandleResponse();
-        //    context.Response.Redirect("/?errormessage=" + context.Exception.Message);
-        //    return Task.FromResult(0);
-        //}
-
     }
 }

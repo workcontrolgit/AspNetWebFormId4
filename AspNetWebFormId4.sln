@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetWebFormImplicitFlow", "AspNetWebFormsOkta\AspNetWebFormImplicitFlow.csproj", "{8BD73074-7330-4EAA-BBE4-98B508E44306}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetWebFormImplicitFlow", "AspNetWebFormImplicitFlow\AspNetWebFormImplicitFlow.csproj", "{8BD73074-7330-4EAA-BBE4-98B508E44306}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

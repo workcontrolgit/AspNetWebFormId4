@@ -1,6 +1,6 @@
 using System;
 
-namespace AspNetWebFormsOkta
+namespace AspNetWebFormImplicitFlow
 {
     public partial class Site_Mobile : System.Web.UI.MasterPage
     {

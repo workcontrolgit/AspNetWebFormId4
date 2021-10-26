@@ -2,7 +2,7 @@ using Microsoft.AspNet.FriendlyUrls;
 
 using System.Web.Routing;
 
-namespace AspNetWebFormsOkta
+namespace AspNetWebFormImplicitFlow
 {
     public static class RouteConfig
     {

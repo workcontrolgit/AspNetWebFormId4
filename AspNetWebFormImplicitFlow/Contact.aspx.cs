@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Web.UI;
 
-namespace AspNetWebFormsOkta
+namespace AspNetWebFormImplicitFlow
 {
     public partial class Contact : Page
     {

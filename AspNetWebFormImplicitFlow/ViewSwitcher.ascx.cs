@@ -3,7 +3,7 @@ using System;
 using System.Web;
 using System.Web.Routing;
 
-namespace AspNetWebFormsOkta
+namespace AspNetWebFormImplicitFlow
 {
     public partial class ViewSwitcher : System.Web.UI.UserControl
     {

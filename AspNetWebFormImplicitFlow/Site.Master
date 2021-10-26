@@ -1,7 +1,7 @@
 ﻿<%@ Master Language="C#"
     AutoEventWireup="true"
     CodeBehind="Site.master.cs"
-    Inherits="AspNetWebFormsOkta.SiteMaster" %>
+    Inherits="AspNetWebFormImplicitFlow.SiteMaster" %>
 
 <!DOCTYPE html>
 

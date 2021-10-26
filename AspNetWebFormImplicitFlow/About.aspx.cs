@@ -4,7 +4,7 @@ using System.Security.Claims;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace AspNetWebFormsOkta
+namespace AspNetWebFormImplicitFlow
 {
     public partial class About : Page
     {

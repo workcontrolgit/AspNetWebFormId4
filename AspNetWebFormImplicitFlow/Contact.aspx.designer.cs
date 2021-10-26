@@ -7,11 +7,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AspNetWebFormsOkta
+namespace AspNetWebFormImplicitFlow
 {
 
 
-    public partial class About
+    public partial class Contact
     {
     }
 }
