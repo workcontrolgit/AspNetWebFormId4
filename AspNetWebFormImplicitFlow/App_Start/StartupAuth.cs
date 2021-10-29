@@ -68,7 +68,6 @@ namespace AspNetWebFormImplicitFlow
 
                             var userInfoClient = new UserInfoClient(_userInfoEndpoint);
                             var userInfoResponse = await userInfoClient.GetAsync(n.ProtocolMessage.AccessToken);
-                            //var userInfoClaims = userInfoResponse.Claims;
                             var userInfoClaims = userInfoResponse.Claims
                                 .Where(x => x.Type != "sub") // filter sub since we're already getting it from id_token
                                 .Select(x => new Claim(x.Type, x.Value));
@@ -95,7 +94,6 @@ namespace AspNetWebFormImplicitFlow
                             throw new Exception(tokenResponse.Error);
                         }
 
-                        //var userInfoClient = new UserInfoClient(_userInfoEndpoint);
                         var userInfoClient = new UserInfoClient(_userInfoEndpoint);
                         var userInfoResponse = await userInfoClient.GetAsync(tokenResponse.AccessToken);
 
