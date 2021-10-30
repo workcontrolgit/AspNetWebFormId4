@@ -23,7 +23,6 @@ namespace AspNetWebFormImplicitFlow
         private readonly string _authority = ConfigurationManager.AppSettings["Oidc:Authority"];
         private readonly string _userInfoEndpoint = ConfigurationManager.AppSettings["Oidc:Authority"] + ConfigurationManager.AppSettings["Oidc:UserInfoEndpoint"];
         private readonly string _tokenInfoEndpoint = ConfigurationManager.AppSettings["Oidc:Authority"] + ConfigurationManager.AppSettings["Oidc:TokenInfoEndpoint"];
-        private readonly string _clientSecret = ConfigurationManager.AppSettings["Oidc:ClientSecret"];
         private readonly string _postLogoutRedirectUri = ConfigurationManager.AppSettings["Oidc:PostLogoutRedirectUri"];
 
         public void ConfigureAuth(IAppBuilder app)
@@ -41,7 +40,6 @@ namespace AspNetWebFormImplicitFlow
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
                 ClientId = _clientId,
-                ClientSecret = _clientSecret,
                 Authority = _authority,
                 RedirectUri = _redirectUri,
                 PostLogoutRedirectUri = _postLogoutRedirectUri,
@@ -86,7 +84,7 @@ namespace AspNetWebFormImplicitFlow
                     AuthorizationCodeReceived = async n =>
                     {
                         // Exchange code for access and ID tokens
-                        var tokenClient = new TokenClient(_tokenInfoEndpoint, _clientId, _clientSecret);
+                        var tokenClient = new TokenClient(_tokenInfoEndpoint);
 
                         var tokenResponse = await tokenClient.RequestAuthorizationCodeAsync(n.Code, _redirectUri);
                         if (tokenResponse.IsError)
