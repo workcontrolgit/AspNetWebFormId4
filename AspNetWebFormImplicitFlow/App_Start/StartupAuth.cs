@@ -44,7 +44,7 @@ namespace AspNetWebFormImplicitFlow
                 RedirectUri = _redirectUri,
                 PostLogoutRedirectUri = _postLogoutRedirectUri,
                 ResponseType = OpenIdConnectResponseType.IdTokenToken,
-                Scope = OpenIdConnectScope.OpenIdProfile,
+                Scope = "openid profile email roles",
                 TokenValidationParameters = new TokenValidationParameters { NameClaimType = "name" },
                 Notifications = new OpenIdConnectAuthenticationNotifications
                 {
