@@ -1,17 +1,20 @@
-﻿using IdentityModel;
-using IdentityModel.Client;
+﻿using IdentityModel.Client;
+
 using Microsoft.AspNet.Identity;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Owin;
+using Microsoft.Owin.Extensions;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Notifications;
 using Microsoft.Owin.Security.OpenIdConnect;
+
 using Owin;
+
 using System;
-using System.Collections.Generic;
 using System.Configuration;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -24,10 +27,10 @@ namespace AspNetWebFormImplicitFlow
     {
         // These values are stored in Web.config. Make sure you update them!
         private readonly string _clientId = ConfigurationManager.AppSettings["Oidc:ClientId"];
+        private readonly string _clientSecret = ConfigurationManager.AppSettings["Oidc:ClientSecret"];
         private readonly string _redirectUri = ConfigurationManager.AppSettings["Oidc:RedirectUri"];
         private readonly string _authority = ConfigurationManager.AppSettings["Oidc:Authority"];
         private readonly string _userInfoEndpoint = ConfigurationManager.AppSettings["Oidc:Authority"] + ConfigurationManager.AppSettings["Oidc:UserInfoEndpoint"];
-        private readonly string _tokenInfoEndpoint = ConfigurationManager.AppSettings["Oidc:Authority"] + ConfigurationManager.AppSettings["Oidc:TokenInfoEndpoint"];
         private readonly string _postLogoutRedirectUri = ConfigurationManager.AppSettings["Oidc:PostLogoutRedirectUri"];
 
         public void ConfigureAuth(IAppBuilder app)
@@ -42,24 +45,34 @@ namespace AspNetWebFormImplicitFlow
                 SlidingExpiration = true
             });
 
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
-                ClientId = _clientId,
+                AuthenticationType = "oidc",
+                SignInAsAuthenticationType = "Cookies",
                 Authority = _authority,
+                ClientId = _clientId,
+                ClientSecret = _clientSecret,
                 RedirectUri = _redirectUri,
                 PostLogoutRedirectUri = _postLogoutRedirectUri,
-                //ResponseType = OpenIdConnectResponseType.IdTokenToken,
-                SignInAsAuthenticationType = "cookie",
-
-                RequireHttpsMetadata = false,
-                UseTokenLifetime = false,
+                ProtocolValidator = new OpenIdConnectProtocolValidator
+                {
+                    RequireNonce = false,
+                    RequireState = false,
+                    RequireStateValidation = false
+                },
                 RedeemCode = true,
-                SaveTokens = true,
-                ClientSecret = "secret",
-                ResponseType = "code",
-                ResponseMode = "query",
-                Scope = "openid profile email roles",
-                TokenValidationParameters = new TokenValidationParameters { NameClaimType = "name" },
+                RequireHttpsMetadata = false,       // for Development only!!!
+                ResponseType = OpenIdConnectResponseType.Code,
+                //SaveTokens = true,
+                //ResponseMode = "query",
+                Scope = "openid email",
+                TokenValidationParameters = new TokenValidationParameters
+                { 
+                    NameClaimType = "name",
+                },
+                UseTokenLifetime = false,
                 Notifications = new OpenIdConnectAuthenticationNotifications
                 {
                     SecurityTokenValidated = async n =>
@@ -95,40 +108,40 @@ namespace AspNetWebFormImplicitFlow
                             ci, n.AuthenticationTicket.Properties
                         );
                     },
-                    RedirectToIdentityProvider = n =>
-                    {
-                        if (n.ProtocolMessage.RequestType == OpenIdConnectRequestType.Authentication)
-                        {
-                            // set PKCE parameters
-                            var codeVerifier = CryptoRandom.CreateUniqueId(32);
+                    //RedirectToIdentityProvider = n =>
+                    //{
+                    //    if (n.ProtocolMessage.RequestType == OpenIdConnectRequestType.Authentication)
+                    //    {
+                    //        // set PKCE parameters
+                    //        var codeVerifier = CryptoRandom.CreateUniqueId(32);
 
-                            string codeChallenge;
-                            using (var sha256 = SHA256.Create())
-                            {
-                                var challengeBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(codeVerifier));
-                                codeChallenge = Base64Url.Encode(challengeBytes);
-                            }
+                    //        string codeChallenge;
+                    //        using (var sha256 = SHA256.Create())
+                    //        {
+                    //            var challengeBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(codeVerifier));
+                    //            codeChallenge = Base64Url.Encode(challengeBytes);
+                    //        }
 
-                            n.ProtocolMessage.SetParameter("code_challenge", codeChallenge);
-                            n.ProtocolMessage.SetParameter("code_challenge_method", "S256");
+                    //        n.ProtocolMessage.SetParameter("code_challenge", codeChallenge);
+                    //        n.ProtocolMessage.SetParameter("code_challenge_method", "S256");
 
-                            // remember code_verifier (adapted from OWIN nonce cookie)
-                            RememberCodeVerifier(n, codeVerifier);
-                        }
+                    //        // remember code_verifier (adapted from OWIN nonce cookie)
+                    //        RememberCodeVerifier(n, codeVerifier);
+                    //    }
 
-                        return Task.CompletedTask;
-                    },
-                    AuthorizationCodeReceived = n =>
-                    {
-                        // get code verifier from cookie
-                        // see: https://github.com/scottbrady91/Blog-Example-Classes/blob/master/AspNetFrameworkPkce/ScottBrady91.BlogExampleCode.AspNetPkce/Startup.cs#L102
-                        var codeVerifier = RetrieveCodeVerifier(n);
+                    //    return Task.CompletedTask;
+                    //},
+                    //AuthorizationCodeReceived = n =>
+                    //{
+                    //    // get code verifier from cookie
+                    //    // see: https://github.com/scottbrady91/Blog-Example-Classes/blob/master/AspNetFrameworkPkce/ScottBrady91.BlogExampleCode.AspNetPkce/Startup.cs#L102
+                    //    var codeVerifier = RetrieveCodeVerifier(n);
 
-                        // attach code_verifier on token request
-                        n.TokenEndpointRequest.SetParameter("code_verifier", codeVerifier);
+                    //    // attach code_verifier on token request
+                    //    n.TokenEndpointRequest.SetParameter("code_verifier", codeVerifier);
 
-                        return Task.CompletedTask;
-                    },
+                    //    return Task.CompletedTask;
+                    //},
                     //AuthorizationCodeReceived = async n =>
                     //{
                     //    // Exchange code for access and ID tokens
@@ -151,18 +164,19 @@ namespace AspNetWebFormImplicitFlow
 
                     //    n.AuthenticationTicket.Identity.AddClaims(claims);
                     //},
-                    //RedirectToIdentityProvider = n =>
-                    //{
-                    //    if (n.ProtocolMessage.RequestType == OpenIdConnectRequestType.Logout)
-                    //    {
-                    //        var id_token = n.OwinContext.Authentication.User.FindFirst("id_token")?.Value;
-                    //        n.ProtocolMessage.IdTokenHint = id_token;
-                    //    }
+                    RedirectToIdentityProvider = n =>
+                    {
+                        if (n.ProtocolMessage.RequestType == OpenIdConnectRequestType.Logout)
+                        {
+                            var id_token = n.OwinContext.Authentication.User.FindFirst("id_token")?.Value;
+                            n.ProtocolMessage.IdTokenHint = id_token;
+                        }
 
-                    //    return Task.FromResult(0);
-                    //}
+                        return Task.CompletedTask;
+                    }
                 },
-            });;
+            });
+            app.UseStageMarker(PipelineStage.Authenticate);
         }
         private void RememberCodeVerifier(RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> n, string codeVerifier)
         {
